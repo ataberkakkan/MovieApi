@@ -2,6 +2,8 @@ package com.movieflix.movieApi.services;
 
 import com.movieflix.movieApi.dtos.MovieDto;
 import com.movieflix.movieApi.entities.Movie;
+import com.movieflix.movieApi.exceptions.FileExistsException;
+import com.movieflix.movieApi.exceptions.MovieNotFoundException;
 import com.movieflix.movieApi.repositories.MovieRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -34,7 +36,7 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public MovieDto addMovie(MovieDto movieDto, MultipartFile file) throws IOException {
         if (Files.exists(Paths.get(path + File.separator + file.getOriginalFilename()))) {
-            throw new RuntimeException("File already exists! Please change the file name");
+            throw new FileExistsException("File already exists! Please change the file name");
         }
 
         String uploadedFileName = fileService.uploadFile(path,file);
@@ -70,7 +72,7 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public MovieDto getMovie(int movieId) {
-         Movie movie = movieRepository.findById(movieId).orElseThrow(() -> new RuntimeException("Movie not found"));
+         Movie movie = movieRepository.findById(movieId).orElseThrow(() -> new MovieNotFoundException("Movie not found"));
 
         String posterUrl = baseUrl + "/file/" + movie.getPoster();
 
@@ -117,7 +119,7 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public MovieDto updateMovie(int movieId, MovieDto movieDto, MultipartFile file) throws IOException {
-        Movie movie = movieRepository.findById(movieId).orElseThrow(() -> new RuntimeException("Movie not found"));
+        Movie movie = movieRepository.findById(movieId).orElseThrow(() -> new MovieNotFoundException("Movie not found"));
 
         String fileName = movie.getPoster();
         if (file != null) {
@@ -157,7 +159,7 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public String deleteMovie(int movieId) throws IOException {
-        Movie movie = movieRepository.findById(movieId).orElseThrow(() -> new RuntimeException("Movie not found"));
+        Movie movie = movieRepository.findById(movieId).orElseThrow(() -> new MovieNotFoundException("Movie not found"));
 
         Files.deleteIfExists(Paths.get(path + File.separator + movie.getPoster()));
 

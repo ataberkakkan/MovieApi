@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.yaml.snakeyaml.emitter.EmitterException;
 
 import java.io.IOException;
 import java.util.List;
@@ -23,6 +24,9 @@ public class MovieController {
 
     @PostMapping("/add")
     public ResponseEntity<MovieDto> addMovie(@RequestPart MultipartFile file, @RequestPart String movieDto) throws IOException {
+        if (file.isEmpty()) {
+            throw new EmitterException("File is empty");
+        }
         MovieDto dto = convertToMovieDto(movieDto);
 
         return new ResponseEntity<>(movieService.addMovie(dto, file), HttpStatus.CREATED);
